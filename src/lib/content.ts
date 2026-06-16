@@ -60,7 +60,7 @@ export async function getShopItems(): Promise<ShopItem[]> {
     title: entry.title,
     description: entry.description,
     images: [toPublicPath("/shop", entry.image)],
-    price: entry.price,
+    price: entry.price ?? 0,
     currency: "RUB" as const,
     inStock: entry.inStock ?? true,
   }));

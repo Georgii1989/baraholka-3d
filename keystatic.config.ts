@@ -2,9 +2,17 @@ import { config, collection, fields, singleton } from "@keystatic/core";
 
 const githubRepo = process.env.KEYSTATIC_GITHUB_REPO;
 
+function parseGithubRepo(repo: string) {
+  const [owner, name] = repo.split("/");
+  if (!owner || !name) {
+    throw new Error(`Invalid KEYSTATIC_GITHUB_REPO: ${repo}`);
+  }
+  return { owner, name };
+}
+
 export default config({
   storage: githubRepo
-    ? { kind: "github", repo: githubRepo }
+    ? { kind: "github", repo: parseGithubRepo(githubRepo) }
     : { kind: "local" },
   ui: {
     brand: { name: "Baraholka 3D" },
