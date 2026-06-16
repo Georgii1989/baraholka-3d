@@ -1,7 +1,9 @@
 {
-  "title": "Millennium Falcon",
+  "title": "Millennium Falcon 21",
   "description": "Крупная детализированная модель (~45 см). Напечатана на FDM, собрана из множества сегментов. Подойдёт для коллекции, декора кабинета или тематического пространства. Цена обсуждается — напишите в чат.",
-  "images": ["millennium-falcon/1.png"],
+  "images": [
+    null
+  ],
   "status": "available",
   "pricing": "negotiable",
   "featured": true
