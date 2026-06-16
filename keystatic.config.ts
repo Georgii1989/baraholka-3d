@@ -1,6 +1,9 @@
 import { config, collection, fields, singleton } from "@keystatic/core";
 
-const githubRepo = process.env.KEYSTATIC_GITHUB_REPO;
+const githubRepo = {
+  owner: "Georgii1989",
+  name: "baraholka-3d",
+} as const;
 
 function parseGithubRepo(repo: string) {
   const [owner, name] = repo.split("/");
@@ -10,10 +13,18 @@ function parseGithubRepo(repo: string) {
   return { owner, name };
 }
 
+const storage =
+  process.env.KEYSTATIC_STORAGE === "local"
+    ? ({ kind: "local" } as const)
+    : ({
+        kind: "github",
+        repo: process.env.KEYSTATIC_GITHUB_REPO
+          ? parseGithubRepo(process.env.KEYSTATIC_GITHUB_REPO.trim())
+          : githubRepo,
+      } as const);
+
 export default config({
-  storage: githubRepo
-    ? { kind: "github", repo: parseGithubRepo(githubRepo) }
-    : { kind: "local" },
+  storage,
   ui: {
     brand: { name: "Baraholka 3D" },
   },
