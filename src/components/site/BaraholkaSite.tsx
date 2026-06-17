@@ -22,6 +22,7 @@ export function BaraholkaSite() {
   const [scrollPct, setScrollPct] = useState(0);
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [fleet, setFleet] = useState(FLEET_INITIAL);
+  const [playHeroVideo, setPlayHeroVideo] = useState(false);
   const progressRef = useRef<HTMLDivElement>(null);
   const year = new Date().getFullYear();
 
@@ -35,7 +36,9 @@ export function BaraholkaSite() {
 
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduced) return;
+    const coarse = window.matchMedia("(pointer: coarse)").matches;
+    const narrow = window.matchMedia("(max-width: 768px)").matches;
+    if (reduced || coarse || narrow) return;
 
     const timer = window.setInterval(() => {
       setFleet((prev) =>
@@ -47,6 +50,16 @@ export function BaraholkaSite() {
     }, 3600);
 
     return () => window.clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const desktop = window.matchMedia(
+      "(min-width: 769px) and (pointer: fine) and (prefers-reduced-motion: no-preference)",
+    );
+    const update = () => setPlayHeroVideo(desktop.matches);
+    update();
+    desktop.addEventListener("change", update);
+    return () => desktop.removeEventListener("change", update);
   }, []);
 
   useEffect(() => {
@@ -241,16 +254,27 @@ export function BaraholkaSite() {
 
               <div className="hero-visual reveal is-visible">
                 <div className="hero-video-wrap">
-                  <video
-                    className="hero-video"
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    poster="/media/hero-print-poster.jpg"
-                  >
-                    <source src="/media/hero-print.mp4" type="video/mp4" />
-                  </video>
+                  {playHeroVideo ? (
+                    <video
+                      className="hero-video"
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      preload="metadata"
+                      poster="/media/hero-print-poster.jpg"
+                    >
+                      <source src="/media/hero-print.mp4" type="video/mp4" />
+                    </video>
+                  ) : (
+                    <img
+                      className="hero-video"
+                      src="/media/hero-print-poster.jpg"
+                      alt="Baraholka G3D — 3D-печать"
+                      loading="eager"
+                      decoding="async"
+                    />
+                  )}
                   <div className="hero-glow-ring" aria-hidden="true" />
                 </div>
               </div>

@@ -81,21 +81,29 @@ const LAYER_MOTION = [
   { max: -200, lerp: 0.05 },
 ] as const;
 
-function ThreadPaths({ threads }: { threads: Thread[] }) {
+function ThreadPaths({
+  threads,
+  glow = true,
+}: {
+  threads: Thread[];
+  glow?: boolean;
+}) {
   return (
     <>
       {threads.map((thread, index) => (
         <g key={`${thread.color}-${index}`}>
-          <path
-            d={thread.d}
-            fill="none"
-            stroke={thread.color}
-            strokeWidth={thread.width * 2.8}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            opacity={thread.opacity * 0.22}
-            filter="url(#filament-glow-outer)"
-          />
+          {glow ? (
+            <path
+              d={thread.d}
+              fill="none"
+              stroke={thread.color}
+              strokeWidth={thread.width * 2.8}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              opacity={thread.opacity * 0.22}
+              filter="url(#filament-glow-outer)"
+            />
+          ) : null}
           <path
             d={thread.d}
             fill="none"
@@ -103,8 +111,8 @@ function ThreadPaths({ threads }: { threads: Thread[] }) {
             strokeWidth={thread.width}
             strokeLinecap="round"
             strokeLinejoin="round"
-            opacity={Math.min(thread.opacity * 1.12, 0.9)}
-            filter="url(#filament-glow-inner)"
+            opacity={glow ? Math.min(thread.opacity * 1.12, 0.9) : thread.opacity * 0.55}
+            filter={glow ? "url(#filament-glow-inner)" : undefined}
           />
         </g>
       ))}
@@ -134,18 +142,31 @@ function lerp(current: number, target: number, amount: number) {
   return current + (target - current) * amount;
 }
 
+function useMotionProfile() {
+  const [profile, setProfile] = useState<"lite" | "full">("lite");
+
+  useEffect(() => {
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const coarse = window.matchMedia("(pointer: coarse)").matches;
+    const narrow = window.matchMedia("(max-width: 768px)").matches;
+    const saveData = "connection" in navigator && (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
+
+    const lite = reduced || coarse || narrow || Boolean(saveData);
+    setProfile(lite ? "lite" : "full");
+  }, []);
+
+  return profile;
+}
+
 export function FilamentThreadsBackground() {
-  const [reducedMotion, setReducedMotion] = useState(false);
+  const profile = useMotionProfile();
   const layerRefs = useRef<(SVGGElement | null)[]>([null, null, null]);
   const targetsRef = useRef<number[]>([0, 0, 0]);
   const currentRef = useRef<number[]>([0, 0, 0]);
   const rafRef = useRef<number>(0);
 
   useEffect(() => {
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const updateMotion = () => setReducedMotion(media.matches);
-    updateMotion();
-    media.addEventListener("change", updateMotion);
+    if (profile !== "full") return;
 
     const updateTargets = () => {
       const total =
@@ -157,37 +178,55 @@ export function FilamentThreadsBackground() {
     };
 
     const tick = () => {
+      let animating = false;
+
       for (let i = 0; i < LAYER_MOTION.length; i += 1) {
-        currentRef.current[i] = lerp(
+        const next = lerp(
           currentRef.current[i],
           targetsRef.current[i],
           LAYER_MOTION[i].lerp,
         );
 
+        if (Math.abs(next - targetsRef.current[i]) > 0.4) {
+          animating = true;
+        }
+
+        currentRef.current[i] = next;
+
         const node = layerRefs.current[i];
         if (node) {
           node.setAttribute(
             "transform",
-            `translate(${currentRef.current[i].toFixed(2)} 0)`,
+            `translate(${next.toFixed(2)} 0)`,
           );
         }
       }
 
-      rafRef.current = requestAnimationFrame(tick);
+      if (animating) {
+        rafRef.current = requestAnimationFrame(tick);
+      } else {
+        rafRef.current = 0;
+      }
+    };
+
+    const onScroll = () => {
+      updateTargets();
+      if (!rafRef.current) {
+        rafRef.current = requestAnimationFrame(tick);
+      }
     };
 
     updateTargets();
-    window.addEventListener("scroll", updateTargets, { passive: true });
+    window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", updateTargets);
     rafRef.current = requestAnimationFrame(tick);
 
     return () => {
-      media.removeEventListener("change", updateMotion);
-      window.removeEventListener("scroll", updateTargets);
+      window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", updateTargets);
-      cancelAnimationFrame(rafRef.current);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
-  }, []);
+  }, [profile]);
 
   return (
     <div
@@ -196,15 +235,19 @@ export function FilamentThreadsBackground() {
     >
       <div className="absolute inset-0 bg-[#070a10]" />
 
+      {profile === "lite" ? (
+        <div className="filament-lite absolute inset-0 opacity-70" />
+      ) : null}
+
       <div className="absolute inset-[-8%]">
         <svg
-          className="absolute inset-0 h-full w-full opacity-60"
+          className={`absolute inset-0 h-full w-full ${profile === "lite" ? "opacity-45" : "opacity-60"}`}
           viewBox="0 0 1800 1000"
           preserveAspectRatio="xMidYMid slice"
         >
-          <defs>{glowDefs}</defs>
-          {reducedMotion ? (
-            <ThreadPaths threads={[...layerA, ...layerB]} />
+          {profile === "full" ? <defs>{glowDefs}</defs> : null}
+          {profile === "lite" ? (
+            <ThreadPaths threads={[...layerA, ...layerB]} glow={false} />
           ) : (
             <>
               <g ref={(node) => { layerRefs.current[0] = node; }}>
