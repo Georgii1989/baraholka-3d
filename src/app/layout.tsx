@@ -1,29 +1,35 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Sans, Plus_Jakarta_Sans } from "next/font/google";
+import { Chakra_Petch, DM_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const display = Plus_Jakarta_Sans({
+const display = Chakra_Petch({
   variable: "--font-display",
   subsets: ["latin", "latin-ext"],
-  weight: ["600", "700", "800"],
+  weight: ["500", "600", "700"],
 });
 
-const body = IBM_Plex_Sans({
+const body = DM_Sans({
   variable: "--font-body",
+  subsets: ["latin", "latin-ext"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const mono = JetBrains_Mono({
+  variable: "--font-mono",
   subsets: ["latin", "cyrillic"],
   weight: ["400", "500", "600"],
 });
 
 export const metadata: Metadata = {
-  title: "Baraholka 3D — студия 3D-печати",
+  title: "Baraholka_G3D — 3D-печать, барахолка моделей и аксессуары",
   description:
-    "Готовые модели из 3D-студии, аксессуары с фиксированными ценами и чат для обсуждения заказа.",
+    "Студия 3D-печати на пяти Bambu Lab A1: готовые модели, аксессуары для принтеров и печать на заказ. Цены обсуждаем в чате.",
   openGraph: {
-    title: "Baraholka 3D",
-    description: "3D-печать · готовые модели · baraholka студии",
+    title: "Baraholka_G3D",
+    description: "3D-печать · барахолка моделей · аксессуары · чат для заказа",
     type: "website",
     locale: "ru_RU",
-    images: [{ url: "/hero/workshop.jpg" }],
+    images: [{ url: "/media/hero-print-poster.jpg" }],
   },
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
@@ -36,8 +42,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ru" className={`${display.variable} ${body.variable} h-full`}>
-      <body className="min-h-full bg-background text-foreground antialiased">
+    <html
+      lang="ru"
+      className={`${display.variable} ${body.variable} ${mono.variable} h-full`}
+    >
+      <body className="min-h-full bg-[#070a10] text-[#eef2f8] antialiased">
         {children}
       </body>
     </html>

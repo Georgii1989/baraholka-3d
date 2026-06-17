@@ -3,7 +3,7 @@
 import type { ChatMessage } from "@/lib/types";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-const SESSION_KEY = "baraholka-session-id";
+const SESSION_KEY = "baraholka-g3d-session-id";
 
 function getOrCreateSessionId(): string {
   const existing = localStorage.getItem(SESSION_KEY);

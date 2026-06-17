@@ -31,7 +31,7 @@ for (const key of required) {
 }
 
 function addEnv(name, value, env, sensitive = false) {
-  const args = ["vercel", "env", "add", name, env];
+  const args = ["vercel", "env", "add", name, env, "--force"];
   if (sensitive) args.push("--sensitive");
   args.push("-y");
   execFileSync("npx", args, {
