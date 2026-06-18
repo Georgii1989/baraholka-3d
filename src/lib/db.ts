@@ -5,18 +5,31 @@ import path from "path";
 let db: Database.Database | null = null;
 
 function getDbPath(): string {
-  const configured = process.env.DATABASE_PATH ?? "./data/chat.db";
-  if (path.isAbsolute(configured)) {
-    return configured;
+  const configured = process.env.DATABASE_PATH?.trim();
+
+  if (process.env.VERCEL) {
+    const vercelPath = configured?.startsWith("/") ? configured : "/tmp/chat.db";
+    return vercelPath;
   }
-  return path.join(/* turbopackIgnore: true */ process.cwd(), configured);
+
+  if (configured) {
+    if (path.isAbsolute(configured)) {
+      return configured;
+    }
+    return path.join(/* turbopackIgnore: true */ process.cwd(), configured);
+  }
+
+  return path.join(/* turbopackIgnore: true */ process.cwd(), "data/chat.db");
 }
 
 export function getDb(): Database.Database {
   if (db) return db;
 
   const dbPath = getDbPath();
-  fs.mkdirSync(path.dirname(dbPath), { recursive: true });
+  const dir = path.dirname(dbPath);
+  if (dir !== "/tmp") {
+    fs.mkdirSync(dir, { recursive: true });
+  }
 
   db = new Database(dbPath);
   db.pragma("journal_mode = WAL");

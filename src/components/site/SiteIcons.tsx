@@ -126,6 +126,13 @@ const paths: Record<string, ReactNode> = {
       <path d="m22 7-10 6L2 7" />
     </>
   ),
+  instagram: (
+    <>
+      <rect x="3" y="3" width="18" height="18" rx="5" />
+      <circle cx="12" cy="12" r="4.2" />
+      <circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none" />
+    </>
+  ),
   menu: (
     <>
       <line x1="3" y1="6" x2="21" y2="6" />

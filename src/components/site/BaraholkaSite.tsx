@@ -3,26 +3,30 @@
 import { FilamentThreadsBackground } from "@/components/background/FilamentThreadsBackground";
 import { ChatWidget } from "@/components/chat/ChatWidget";
 import { useChatUi } from "@/components/providers/ChatProvider";
+import { CatalogProductCard } from "@/components/site/CatalogProductCard";
+import { CatalogProductModal } from "@/components/site/CatalogProductModal";
+import type { FeaturedCatalogItem } from "@/components/site/catalog-types";
 import {
-  catalogItems,
-  filterOptions,
-  shopItems,
+  featuredCatalogItems,
+  modelSites,
 } from "@/components/site/data";
 import { SiteIcon } from "@/components/site/SiteIcons";
 import { useCallback, useEffect, useRef, useState } from "react";
 import "./baraholka-site.css";
 
-const NAV_IDS = ["catalog", "shop", "order", "about", "contacts"] as const;
+const NAV_IDS = ["order", "catalog", "about", "contacts"] as const;
 const FLEET_INITIAL = [64, 28, 91, 47, 12];
 
 export function BaraholkaSite() {
   const { openChat } = useChatUi();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [filter, setFilter] = useState<(typeof filterOptions)[number]["id"]>("all");
   const [scrollPct, setScrollPct] = useState(0);
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [fleet, setFleet] = useState(FLEET_INITIAL);
   const [playHeroVideo, setPlayHeroVideo] = useState(false);
+  const [activeProduct, setActiveProduct] = useState<FeaturedCatalogItem | null>(
+    null,
+  );
   const progressRef = useRef<HTMLDivElement>(null);
   const year = new Date().getFullYear();
 
@@ -115,7 +119,7 @@ export function BaraholkaSite() {
 
     nodes.forEach((node) => observer.observe(node));
     return () => observer.disconnect();
-  }, [filter]);
+  }, []);
 
   return (
     <>
@@ -140,16 +144,15 @@ export function BaraholkaSite() {
         <header className="site-header">
           <div className="nav">
             <a href="#main" className="logo">
-              <span className="logo-main">Baraholka</span>
-              <span className="logo-sub">_G3D</span>
+              <span className="logo-main">G3D</span>
+              <span className="logo-sub">_printing studio</span>
             </a>
 
             <nav className="nav-links" aria-label="Основная навигация">
               {NAV_IDS.map((id) => {
                 const labels: Record<(typeof NAV_IDS)[number], string> = {
-                  catalog: "Барахолка",
-                  shop: "Магазин",
                   order: "На заказ",
+                  catalog: "Барахолка",
                   about: "О студии",
                   contacts: "Контакты",
                 };
@@ -188,9 +191,8 @@ export function BaraholkaSite() {
           <div className={`mobile-menu${menuOpen ? " open" : ""}`} id="mobileMenu">
             {NAV_IDS.map((id) => {
               const labels: Record<(typeof NAV_IDS)[number], string> = {
-                catalog: "Барахолка",
-                shop: "Магазин",
                 order: "На заказ",
+                catalog: "Барахолка",
                 about: "О студии",
                 contacts: "Контакты",
               };
@@ -218,17 +220,11 @@ export function BaraholkaSite() {
                   <span className="accent">слой за слоем.</span>
                 </h1>
                 <p className="lead">
-                  Барахолка студии 3D-печати G3D — готовые модели для дома,
+                  Барахолка студии G3D_printing studio — готовые модели для дома,
                   интерьера кафе и гостиниц. Нашли то, что зацепило? Напишите —
                   договоримся о цене и доставке.
                 </p>
                 <div className="hero-actions">
-                  <a href="#catalog" className="chip-link">
-                    Барахолка моделей →
-                  </a>
-                  <a href="#shop" className="chip-link">
-                    Магазин аксессуаров →
-                  </a>
                   <button
                     type="button"
                     className="chip-link"
@@ -236,13 +232,16 @@ export function BaraholkaSite() {
                   >
                     Печать на заказ →
                   </button>
+                  <a href="#catalog" className="chip-link">
+                    Барахолка моделей →
+                  </a>
                 </div>
 
                 <div className="fleet" aria-hidden="true">
                   <p className="fleet-title">Очередь печати · сейчас</p>
                   {fleet.map((pct, index) => (
                     <div className="fleet-row" key={index}>
-                      <span className="fleet-id">A1 · #{index + 1}</span>
+                      <span className="fleet-id">FDM · #{index + 1}</span>
                       <span className="fleet-bar">
                         <i style={{ width: `${pct}%` }} />
                       </span>
@@ -270,7 +269,7 @@ export function BaraholkaSite() {
                     <img
                       className="hero-video"
                       src="/media/hero-print-poster.jpg"
-                      alt="Baraholka G3D — 3D-печать"
+                      alt="G3D_printing studio — 3D-печать"
                       loading="eager"
                       decoding="async"
                     />
@@ -281,156 +280,29 @@ export function BaraholkaSite() {
             </div>
           </section>
 
-          <section className="section" id="about">
-            <div className="container">
-              <div className="about-grid">
-                <div className="reveal">
-                  <p className="eyebrow">О студии</p>
-                  <h2>Пять принтеров — одна точная задача</h2>
-                  <div className="about-text">
-                    <p>
-                      Студия работает на пяти Bambu Lab A1 одновременно — партии
-                      моделей печатаются параллельно, а не друг за другом.
-                    </p>
-                    <p>
-                      Печатаем PLA, PETG и TPU, подбираем цвет под задачу и
-                      проверяем каждую деталь руками перед тем, как отдать или
-                      выложить в каталог.
-                    </p>
-                  </div>
-                  <div className="material-tags">
-                    {["PLA", "PETG", "TPU (гибкий)", "Мультицвет"].map((tag) => (
-                      <span className="material-tag" key={tag}>
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="stat-strip reveal">
-                  {[
-                    ["5", "принтеров Bambu Lab A1 в параллели"],
-                    ["0.08мм", "минимальная высота слоя"],
-                    ["3", "материала в работе постоянно"],
-                    ["1–3 дня", "обычный срок старта заказа"],
-                  ].map(([num, lbl]) => (
-                    <div className="stat" key={lbl}>
-                      <span className="num">{num}</span>
-                      <span className="lbl">{lbl}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <section className="section" id="catalog">
-            <div className="container">
-              <div className="section-head reveal">
-                <p className="eyebrow">Барахолка</p>
-                <h2>Готовые модели — забирайте по договорённости</h2>
-                <p className="section-sub">
-                  Напечатанные модели для дома, кафе и декора. Фиксированных цен
-                  нет — напишите в чат, обсудим.
-                </p>
-              </div>
-
-              <div
-                className="filters"
-                role="group"
-                aria-label="Фильтр по категориям"
-              >
-                {filterOptions.map((option) => (
-                  <button
-                    key={option.id}
-                    type="button"
-                    className="filter-chip"
-                    data-filter={option.id}
-                    aria-pressed={filter === option.id}
-                    onClick={() => setFilter(option.id)}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-
-              <div className="grid grid-4">
-                {catalogItems
-                  .filter((item) => filter === "all" || item.cat === filter)
-                  .map((item) => (
-                    <article className="card reveal" key={item.name}>
-                      <div className="card-top">
-                        <div className="card-icon">
-                          <SiteIcon name={item.icon} size={24} />
-                        </div>
-                        <span className="tag">{item.catLabel}</span>
-                      </div>
-                      <h3>{item.name}</h3>
-                      <p className="material">{item.mat}</p>
-                      <div className="card-foot">
-                        <span className="price-pill">по договорённости</span>
-                        <button
-                          type="button"
-                          className="btn btn-ghost btn-sm"
-                          onClick={() =>
-                            openTopic(`Барахолка · ${item.name}`)
-                          }
-                        >
-                          Написать
-                        </button>
-                      </div>
-                    </article>
-                  ))}
-              </div>
-            </div>
-          </section>
-
-          <section className="section" id="shop">
-            <div className="container">
-              <div className="section-head reveal">
-                <p className="eyebrow">Магазин</p>
-                <h2>Аксессуары для принтеров</h2>
-                <p className="section-sub">
-                  Подсветка, запасные хотэнды и филамент — всё, что обычно
-                  докупают, пока принтеры работают.
-                </p>
-              </div>
-
-              <div className="grid grid-3">
-                {shopItems.map((item) => (
-                  <article className="card reveal" key={item.name}>
-                    <div className="card-top">
-                      <div className="card-icon">
-                        <SiteIcon name={item.icon} size={24} />
-                      </div>
-                    </div>
-                    <h3>{item.name}</h3>
-                    <p className="material">{item.mat}</p>
-                    <div className="card-foot">
-                      <span className="price-real">{item.price}</span>
-                      <button
-                        type="button"
-                        className="btn btn-ghost btn-sm"
-                        onClick={() => openTopic(`Магазин · ${item.name}`)}
-                      >
-                        Заказать
-                      </button>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </div>
-          </section>
-
           <section className="section" id="order">
             <div className="container">
               <div className="section-head reveal">
                 <p className="eyebrow">На заказ</p>
-                <h2>Принесите свою модель — напечатаем</h2>
+                <h2>Выберите свою модель — напечатаем</h2>
                 <p className="section-sub">
-                  Ссылка на MakerWorld, Thingiverse, Printables — или свой STL /
+                  Нашли модель на одном из каталогов ниже — или есть свой STL /
                   3MF. Посчитаем материал, сроки и цену в чате.
                 </p>
+                <div className="model-sites reveal is-visible">
+                  {modelSites.map((site) => (
+                    <a
+                      key={site.name}
+                      href={site.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="model-site-link"
+                    >
+                      {site.name}
+                      <span aria-hidden="true">↗</span>
+                    </a>
+                  ))}
+                </div>
               </div>
 
               <div className="steps">
@@ -438,7 +310,7 @@ export function BaraholkaSite() {
                   [
                     "01 / Модель",
                     "Находите модель",
-                    "Ссылка на MakerWorld, Thingiverse, Printables — или свой файл STL / 3MF.",
+                    "Выберите модель на MakerWorld, Printables, Thingiverse, Thangs или Cults3D — или пришлите свой файл STL / 3MF.",
                   ],
                   [
                     "02 / Передача",
@@ -480,6 +352,68 @@ export function BaraholkaSite() {
             </div>
           </section>
 
+          <section className="section" id="catalog">
+            <div className="container">
+              <div className="section-head reveal">
+                <p className="eyebrow">Барахолка</p>
+                <h2>Готовые модели — забирайте по договорённости</h2>
+              </div>
+
+              <div className="catalog-featured">
+                {featuredCatalogItems.map((item) => (
+                  <CatalogProductCard
+                    key={item.id}
+                    item={item}
+                    onOpen={() => setActiveProduct(item)}
+                  />
+                ))}
+              </div>
+            </div>
+          </section>
+
+          <section className="section" id="about">
+            <div className="container">
+              <div className="about-grid">
+                <div className="reveal">
+                  <p className="eyebrow">О студии</p>
+                  <h2>Пять принтеров — одна точная задача</h2>
+                  <div className="about-text">
+                    <p>
+                      Студия работает на пяти FDM-принтерах одновременно — партии
+                      моделей печатаются параллельно, а не друг за другом.
+                    </p>
+                    <p>
+                      Печатаем PLA и PETG, подбираем цвет под задачу и
+                      проверяем каждую деталь руками перед тем, как отдать или
+                      выложить в каталог.
+                    </p>
+                  </div>
+                  <div className="material-tags">
+                    {["PLA", "PETG", "Мультицвет"].map((tag) => (
+                      <span className="material-tag" key={tag}>
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="stat-strip reveal">
+                  {[
+                    ["5", "FDM-принтеров в параллели"],
+                    ["0.08мм", "минимальная высота слоя"],
+                    ["2", "материала в работе постоянно"],
+                    ["1–3 дня", "обычный срок старта заказа"],
+                  ].map(([num, lbl]) => (
+                    <div className="stat" key={lbl}>
+                      <span className="num">{num}</span>
+                      <span className="lbl">{lbl}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+
           <section className="section" id="contacts" style={{ borderBottom: "none" }}>
             <div className="container">
               <div className="contact-grid">
@@ -491,8 +425,7 @@ export function BaraholkaSite() {
                     Можно забирать.
                   </h2>
                   <p className="section-sub">
-                    Основной канал — чат на сайте. Ответ придёт из Telegram.
-                    Контакты ниже добавим позже.
+                    Напишите нам в чат или в группу Telegram.
                   </p>
 
                   <div className="contact-list">
@@ -509,21 +442,41 @@ export function BaraholkaSite() {
                         Обсудить цену и заказ
                       </span>
                     </button>
-                    <a href="https://t.me/sloy_studio" className="contact-item">
+                    <a
+                      href="https://t.me/BaraholkaG3D"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="contact-item"
+                    >
                       <span className="ico">
                         <SiteIcon name="telegram" size={18} />
                       </span>
                       <span className="meta">
-                        <small>Telegram</small>@sloy_studio
+                        <small>Telegram</small>
+                        @BaraholkaG3D
                       </span>
                     </a>
-                    <a href="mailto:hello@sloy.studio" className="contact-item">
+                    <a
+                      href="https://www.instagram.com/g3d_printing.studio"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="contact-item"
+                    >
+                      <span className="ico">
+                        <SiteIcon name="instagram" size={18} />
+                      </span>
+                      <span className="meta">
+                        <small>Instagram</small>
+                        @g3d_printing.studio
+                      </span>
+                    </a>
+                    <a href="mailto:g3dprint@mail.ru" className="contact-item">
                       <span className="ico">
                         <SiteIcon name="mail" size={18} />
                       </span>
                       <span className="meta">
                         <small>Почта</small>
-                        hello@sloy.studio
+                        g3dprint@mail.ru
                       </span>
                     </a>
                   </div>
@@ -532,9 +485,9 @@ export function BaraholkaSite() {
                 <div className="reveal">
                   <div className="info-block">
                     {[
-                      ["Студия", "Baraholka_G3D"],
-                      ["Оборудование", "5 × Bambu Lab A1"],
-                      ["Материалы", "PLA · PETG · TPU"],
+                      ["Студия", "G3D_printing studio"],
+                      ["Оборудование", "5 × FDM-принтер"],
+                      ["Материалы", "PLA · PETG"],
                       ["Барахолка", "цена в чате"],
                       ["Заказы", "модель / ссылка → расчёт"],
                     ].map(([label, value]) => (
@@ -553,15 +506,26 @@ export function BaraholkaSite() {
         <footer className="site-footer">
           <div className="container footer-row">
             <span className="logo">
-              <span className="logo-main">Baraholka</span>
-              <span className="logo-sub">_G3D</span>
+              <span className="logo-main">G3D</span>
+              <span className="logo-sub">_printing studio</span>
             </span>
-            <span>© {year} · студия 3D-печати на Bambu Lab A1</span>
+            <span>© {year} · G3D_printing studio</span>
           </div>
         </footer>
       </div>
 
       <ChatWidget />
+
+      {activeProduct ? (
+        <CatalogProductModal
+          item={activeProduct}
+          onClose={() => setActiveProduct(null)}
+          onDiscuss={() => {
+            openTopic(`Барахолка · ${activeProduct.name}`);
+            setActiveProduct(null);
+          }}
+        />
+      ) : null}
     </>
   );
 }

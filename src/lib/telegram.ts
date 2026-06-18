@@ -1,11 +1,11 @@
 import { Bot } from "grammy";
 
 export function getBotToken(): string | undefined {
-  return process.env.TELEGRAM_BOT_TOKEN;
+  return process.env.TELEGRAM_BOT_TOKEN?.trim();
 }
 
 export function getAdminChatId(): string | undefined {
-  return process.env.TELEGRAM_ADMIN_CHAT_ID;
+  return process.env.TELEGRAM_ADMIN_CHAT_ID?.trim();
 }
 
 export function isTelegramConfigured(): boolean {

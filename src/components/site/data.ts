@@ -1,3 +1,7 @@
+import type { FeaturedCatalogItem } from "./catalog-types";
+
+export type { FeaturedCatalogItem };
+
 export type CatalogItem = {
   icon: string;
   name: string;
@@ -5,6 +9,77 @@ export type CatalogItem = {
   catLabel: string;
   mat: string;
 };
+
+export const featuredCatalogItems = [
+  {
+    id: "millennium-falcon",
+    name: "Millennium Falcon",
+    mat: "PETG · PLA",
+    catLabel: "Коллекция",
+    description:
+      "Детализированная модель легендарного корабля для ценителей мира «Звёздных войн», коллекционеров и как выразительный элемент декора.",
+    cover: "/catalog/millennium-falcon/main.png",
+    gallery: [
+      { type: "image", src: "/catalog/millennium-falcon/main.png", alt: "Millennium Falcon — общий вид" },
+      { type: "image", src: "/catalog/millennium-falcon/photo-01-cockpit.jpg", alt: "Кокпит с фигурками" },
+      { type: "image", src: "/catalog/millennium-falcon/photo-02-stand.jpg", alt: "На подставке" },
+      { type: "image", src: "/catalog/millennium-falcon/photo-03-side.jpg", alt: "Вид сбоку" },
+      { type: "image", src: "/catalog/millennium-falcon/photo-04-top.jpg", alt: "Вид сверху" },
+      { type: "image", src: "/catalog/millennium-falcon/photo-05-desk.jpg", alt: "На рабочем столе" },
+      {
+        type: "video",
+        src: "/catalog/millennium-falcon/tour.mp4",
+        poster: "/catalog/millennium-falcon/tour-poster.jpg",
+        alt: "Видеообзор модели",
+      },
+    ],
+    featured: true,
+  },
+  {
+    id: "oko-lamp",
+    name: "ОКО",
+    mat: "PLA",
+    catLabel: "Декор",
+    description:
+      "Декоративный настенный светильник в форме глаза — не основной источник света, а акцент для атмосферы. Внутри RGB-лампочка с пультом: меняйте цвет и яркость под настроение. Питается от трёх батареек AAA. В интерьере особенно эффектно смотрится пара или группа — живой, мягкий свет без лишней нагрузки на глаза.",
+    cover: "/catalog/oko/main.png",
+    gallery: [
+      { type: "image", src: "/catalog/oko/main.png", alt: "ОКО — общий вид" },
+      {
+        type: "image",
+        src: "/catalog/oko/photo-02-lit.jpg",
+        alt: "Светильник включён",
+      },
+      {
+        type: "image",
+        src: "/catalog/oko/photo-03-interior.jpg",
+        alt: "В интерьере",
+      },
+      {
+        type: "image",
+        src: "/catalog/oko/photo-04-back.jpg",
+        alt: "Вид сзади",
+      },
+      {
+        type: "image",
+        src: "/catalog/oko/photo-05-angle.jpg",
+        alt: "Детали текстуры",
+      },
+      {
+        type: "image",
+        src: "/catalog/oko/photo-06-desk.jpg",
+        alt: "На стене над рабочим местом",
+      },
+      {
+        type: "video",
+        src: "/catalog/oko/tour.mp4",
+        poster: "/catalog/oko/tour-poster.jpg",
+        alt: "Видеообзор светильника",
+      },
+    ],
+    featured: true,
+  },
+] satisfies FeaturedCatalogItem[];
 
 export type ShopItem = {
   icon: string;
@@ -82,7 +157,7 @@ export const shopItems: ShopItem[] = [
   {
     icon: "hotend",
     name: "Хотэнд 0.4мм",
-    mat: "запасной, под Bambu Lab A1",
+    mat: "запасной, под FDM-принтер",
     price: "1290 ₽",
   },
   {
@@ -103,12 +178,6 @@ export const shopItems: ShopItem[] = [
     mat: "прочный, термостойкий",
     price: "1390 ₽",
   },
-  {
-    icon: "spool",
-    name: "TPU филамент, 1кг",
-    mat: "гибкий, для амортизации",
-    price: "1690 ₽",
-  },
 ];
 
 export const filterOptions = [
@@ -117,4 +186,12 @@ export const filterOptions = [
   { id: "cafe", label: "Кафе" },
   { id: "decor", label: "Декор" },
   { id: "misc", label: "Разное" },
+] as const;
+
+export const modelSites = [
+  { name: "MakerWorld", url: "https://makerworld.com/ru" },
+  { name: "Printables", url: "https://www.printables.com/" },
+  { name: "Thingiverse", url: "https://www.thingiverse.com/" },
+  { name: "Thangs", url: "https://thangs.com/" },
+  { name: "Cults3D", url: "https://cults3d.com/ru" },
 ] as const;

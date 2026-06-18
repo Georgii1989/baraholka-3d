@@ -23,6 +23,20 @@ export function useChat(isOpen: boolean, topic: string, initialDraft = "") {
   const [error, setError] = useState<string | null>(null);
   const lastIdRef = useRef(0);
 
+  const mergeMessages = useCallback((incoming: ChatMessage[]) => {
+    if (incoming.length === 0) return;
+    setMessages((prev) => {
+      const seen = new Set(prev.map((message) => message.id));
+      const next = incoming.filter((message) => !seen.has(message.id));
+      if (next.length === 0) return prev;
+      return [...prev, ...next];
+    });
+    lastIdRef.current = Math.max(
+      lastIdRef.current,
+      ...incoming.map((message) => message.id),
+    );
+  }, []);
+
   const poll = useCallback(async () => {
     if (!sessionId) return;
     try {
@@ -31,14 +45,11 @@ export function useChat(isOpen: boolean, topic: string, initialDraft = "") {
       );
       if (!res.ok) return;
       const data = (await res.json()) as { messages: ChatMessage[] };
-      if (data.messages.length > 0) {
-        setMessages((prev) => [...prev, ...data.messages]);
-        lastIdRef.current = data.messages[data.messages.length - 1].id;
-      }
+      mergeMessages(data.messages);
     } catch {
       // ignore transient poll errors
     }
-  }, [sessionId]);
+  }, [sessionId, mergeMessages]);
 
   useEffect(() => {
     if (!isOpen || !sessionId) return;
@@ -59,19 +70,41 @@ export function useChat(isOpen: boolean, topic: string, initialDraft = "") {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sessionId, text, topic: topic || undefined }),
       });
-      const data = await res.json();
+      const raw = await res.text();
+      let data: {
+        error?: string;
+        message?: ChatMessage;
+        telegramConfigured?: boolean;
+        telegramError?: string;
+      } = {};
+      try {
+        data = raw ? JSON.parse(raw) : {};
+      } catch {
+        throw new Error("Сервер вернул некорректный ответ. Попробуйте ещё раз.");
+      }
       if (!res.ok) {
         throw new Error(data.error ?? "Send failed");
       }
-      setMessages((prev) => [...prev, data.message]);
-      lastIdRef.current = data.message.id;
+      if (!data.message) {
+        throw new Error("Сервер не вернул сообщение");
+      }
+      mergeMessages([data.message]);
       setDraft("");
+      if (!data.telegramConfigured) {
+        const hint =
+          typeof window !== "undefined" &&
+          (window.location.hostname === "localhost" ||
+            window.location.hostname === "127.0.0.1")
+            ? "Сообщение сохранено локально, но в Telegram не ушло. Для проверки чата откройте baraholka-3d.vercel.app или включите VPN."
+            : "Сообщение не дошло до Telegram. Напишите нам в @BaraholkaG3D.";
+        setError(data.telegramError ?? hint);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Не удалось отправить");
     } finally {
       setSending(false);
     }
-  }, [draft, sessionId, sending, topic]);
+  }, [draft, sessionId, sending, topic, mergeMessages]);
 
   return {
     messages,

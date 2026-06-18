@@ -21,11 +21,11 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Baraholka_G3D — 3D-печать, барахолка моделей и аксессуары",
+  title: "G3D_printing studio — барахолка 3D-моделей",
   description:
-    "Студия 3D-печати на пяти Bambu Lab A1: готовые модели, аксессуары для принтеров и печать на заказ. Цены обсуждаем в чате.",
+    "Барахолка студии G3D_printing studio: готовые модели для дома, кафе и гостиниц. Печать на заказ. Цены обсуждаем в чате.",
   openGraph: {
-    title: "Baraholka_G3D",
+    title: "G3D_printing studio",
     description: "3D-печать · барахолка моделей · аксессуары · чат для заказа",
     type: "website",
     locale: "ru_RU",

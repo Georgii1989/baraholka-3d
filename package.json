@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "deploy": "vercel --prod --yes",
     "telegram:poll": "node --env-file=.env.local scripts/telegram-poll.mjs"
   },
   "dependencies": {
